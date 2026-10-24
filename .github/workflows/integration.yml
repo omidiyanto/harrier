@@ -1,0 +1,59 @@
+name: Integration
+
+# Harrier against a real Wazuh single-node stack (official docker compose):
+# enrollment, alerts with the identity label, the least-privilege API user,
+# certificate pinning and the inventory cleanup on real records.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["site/**", "README.md", ".github/workflows/pages.yml"]
+  pull_request:
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # On main every commit gets its own run; superseded PR runs are cancelled.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  WAZUH_VERSION: 4.14.9
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  wazuh:
+    name: real Wazuh single-node (docker compose)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build
+        run: |
+          rustup toolchain install stable --profile minimal
+          bash .github/run.sh cargo +stable build --release --locked
+          mkdir dist && cp target/release/harrier dist/harrier-linux-x86_64
+      - name: Integration test
+        run: bash .github/run.sh bash .github/integration.sh dist "$WAZUH_VERSION"
+      # Job logs are long; the parts that explain a failure become annotations.
+      - name: Diagnostics
+        if: failure()
+        run: |
+          note() { echo "::warning title=$1::$(tr -d '\r' | tail -n 40 | sed 's/%/%25/g' | awk '{ printf "%s%%0A", $0 }')"; }
+          stack="$RUNNER_TEMP/harrier-it/wazuh-docker/single-node/docker-compose.yml"
+          sudo tail -n 40 /var/ossec/logs/ossec.log | note "agent ossec.log"
+          sudo journalctl -u harrier -u harrier-reconcile -u wazuh-agent --no-pager -n 40 | note "journal"
+          sudo sed -n '/<client>/,/<\/client>/p' /var/ossec/etc/ossec.conf | note "agent client config"
+          sudo cut -d' ' -f1-3 /var/ossec/etc/client.keys | note "agent client.keys"
+          if [ -f "$stack" ]; then
+            docker compose -f "$stack" exec -T wazuh.manager tail -n 40 /var/ossec/logs/ossec.log | note "manager ossec.log"
+          fi

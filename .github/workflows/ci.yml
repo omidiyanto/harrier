@@ -1,0 +1,171 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  # Windows 7 targets are tier 3: pinned nightly + build-std. Bump deliberately.
+  NIGHTLY: nightly-2026-09-15
+  # Wazuh agent installed by the end-to-end tests.
+  WAZUH_VERSION: 4.14.9
+
+# Steps run through .github/run.sh, which turns a failure's last output lines
+# into an annotation on the run page.
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check:
+    name: lint & test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Rust
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt,clippy
+          rustup default stable
+      - run: bash .github/run.sh cargo fmt --all --check
+      - run: bash .github/run.sh cargo clippy --all-targets --locked -- -D warnings
+      - run: bash .github/run.sh cargo test --locked
+      - name: Lint shell scripts
+        if: runner.os == 'Linux'
+        run: |
+          command -v shellcheck >/dev/null || sudo apt-get install -y -qq shellcheck
+          bash .github/run.sh shellcheck install.sh .github/run.sh .github/e2e.sh .github/integration.sh
+      - name: Lint PowerShell scripts
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          foreach ($f in 'install.ps1', '.github/e2e.ps1') {
+            $errors = $null
+            [void][Management.Automation.Language.Parser]::ParseFile((Resolve-Path $f).Path, [ref]$null, [ref]$errors)
+            foreach ($e in $errors) { Write-Host "::error file=$f,line=$($e.Extent.StartLineNumber)::$($e.Message)" }
+            if ($errors) { exit 1 }
+          }
+
+  build:
+    name: build ${{ matrix.asset }}
+    needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-latest, asset: linux-x86_64, e2e: true }
+          - { target: i686-unknown-linux-musl, os: ubuntu-latest, asset: linux-i686 }
+          - { target: x86_64-win7-windows-msvc, os: windows-latest, asset: windows-x86_64.exe, e2e: true }
+          - { target: i686-win7-windows-msvc, os: windows-latest, asset: windows-i686.exe }
+    runs-on: ${{ matrix.os }}
+    env:
+      TARGET: ${{ matrix.target }}
+      ASSET: harrier-${{ matrix.asset }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build (Linux, fully static musl)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gcc-multilib
+          rustup toolchain install stable --profile minimal --target "$TARGET"
+          bash .github/run.sh cargo +stable build --release --locked --target "$TARGET"
+          mkdir dist && cp "target/$TARGET/release/harrier" "dist/$ASSET"
+
+      - name: Build (Windows 7 and later, static CRT)
+        if: runner.os == 'Windows'
+        run: |
+          rustup toolchain install "$NIGHTLY" --profile minimal --component rust-src
+          bash .github/run.sh cargo "+$NIGHTLY" build --release --locked -Z build-std=std,panic_abort --target "$TARGET"
+          mkdir dist && cp "target/$TARGET/release/harrier.exe" "dist/$ASSET"
+
+      # Exercises the real SMBIOS / NIC / registry code on each platform.
+      - name: Smoke test
+        run: |
+          sudo=
+          if [ "$RUNNER_OS" = Linux ]; then sudo=sudo; fi
+          bash .github/run.sh $sudo "dist/$ASSET" --version
+          bash .github/run.sh $sudo "dist/$ASSET" status
+          bash .github/run.sh $sudo "dist/$ASSET" name
+
+      - name: Windows executable carries the Harrier icon
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Add-Type -AssemblyName System.Drawing
+          $bmp = [System.Drawing.Icon]::ExtractAssociatedIcon((Resolve-Path "dist/$env:ASSET").Path).ToBitmap()
+          $orange = 0
+          for ($y = 0; $y -lt $bmp.Height; $y++) { for ($x = 0; $x -lt $bmp.Width; $x++) {
+            $p = $bmp.GetPixel($x, $y); if ($p.R -eq 255 -and $p.G -eq 122 -and $p.B -eq 26) { $orange++ } } }
+          if ($orange -lt 50) { Write-Host "::error title=Windows icon::$env:ASSET has no Harrier icon ($orange orange pixels)"; exit 1 }
+          Write-Host "Harrier icon present ($orange orange pixels at $($bmp.Width)x$($bmp.Height))"
+
+      - name: End-to-end (Linux, real Wazuh agent, systemd service)
+        if: matrix.e2e && runner.os == 'Linux'
+        run: bash .github/run.sh bash .github/e2e.sh dist "$WAZUH_VERSION"
+
+      - name: End-to-end (Windows, real Wazuh agent, Windows service)
+        if: matrix.e2e && runner.os == 'Windows'
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File .github/e2e.ps1 -Dist dist -Version $env:WAZUH_VERSION
+          exit $LASTEXITCODE
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.ASSET }}
+          path: dist/harrier-*
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Tag must match Cargo.toml version
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)
+          [ "$GITHUB_REF_NAME" = "v$version" ] || { echo "tag $GITHUB_REF_NAME != v$version"; exit 1; }
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Installers and checksums
+        run: |
+          cp install.sh install.ps1 dist/
+          cd dist && sha256sum harrier-* install.* > SHA256SUMS && cat SHA256SUMS
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            dist/harrier-*
+            dist/install.*
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --title "Harrier $GITHUB_REF_NAME" --generate-notes --verify-tag

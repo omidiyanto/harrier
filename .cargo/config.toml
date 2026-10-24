@@ -1,0 +1,6 @@
+# Windows (MSVC): static CRT, so no Visual C++ redistributable is needed
+# (Windows 7+), and imported DLLs are only loaded from System32 (blocks DLL
+# planting when harrier.exe is started from e.g. Downloads; Windows 10 1607+,
+# ignored by older loaders, where harrier loads iphlpapi.dll by full path).
+[target.'cfg(all(windows, target_env = "msvc"))']
+rustflags = ["-C", "target-feature=+crt-static", "-C", "link-arg=/DEPENDENTLOADFLAG:0x800"]

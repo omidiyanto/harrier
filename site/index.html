@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harrier, the fleet guardian for Wazuh</title>
+<meta name="description" content="Harrier ties every Wazuh agent to its hardware, revives agents that hang or drift, and keeps the manager's inventory free of duplicates and ghosts. One dependency-free binary for Linux and Windows 7+.">
+<meta name="theme-color" content="#120d0a">
+<link rel="icon" href="brand/harrier-icon.svg" type="image/svg+xml">
+<link rel="icon" href="brand/harrier-icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="brand/harrier-icon-256.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Harrier, the fleet guardian for Wazuh">
+<meta property="og:description" content="One machine, one agent, one record. Hardware-bound agent identity, self-healing agents and a clean inventory for Wazuh.">
+<meta property="og:image" content="%BASE_URL%/brand/harrier-social.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<script>try{var t=localStorage.getItem("harrier-theme")}catch(e){}document.documentElement.dataset.theme=t||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");</script>
+<script src="assets/site.js" defer></script>
+<script src="assets/harrier.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Harrier home"><span data-bird="2"></span><span class="brand-name">Harrier</span></a>
+    <nav class="topnav" aria-label="Main">
+      <a href="docs.html">Docs</a>
+      <a class="hide-narrow" href="#install">Install</a>
+      <a href="https://github.com/omidiyanto/harrier">GitHub</a>
+    </nav>
+    <button class="icon-button" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to light theme">
+      <svg class="moon" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M6 1h4v1H6zM4 2h2v1H4zM3 3h1v1H3zM2 4h1v2H2zM1 6h1v4H1zM2 10h1v2H2zM3 12h1v1H3zM4 13h2v1H4zM6 14h4v1H6zM10 13h2v1h-2zM12 12h1v1h-1zM13 10h1v2h-1zM9 9h4v1H9zM7 7h2v2H7zM6 3h1v4H6z"/></svg>
+      <svg class="sun" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M7 0h2v2H7zM7 14h2v2H7zM0 7h2v2H0zM14 7h2v2h-2zM2 2h2v2H2zM12 2h2v2h-2zM2 12h2v2H2zM12 12h2v2h-2zM6 4h4v1H6zM5 5h6v6H5zM6 11h4v1H6zM4 6h1v4H4zM11 6h1v4h-1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <h1><span>One machine.</span> <span>One agent.</span> <span>One record.</span></h1>
+        <p class="lede">Harrier ties every Wazuh agent to the hardware it runs on, revives agents that hang or drift, and keeps your manager's inventory free of duplicates and ghosts.</p>
+        <div class="actions">
+          <a class="button primary" href="#install">Install Harrier</a>
+          <a class="button quiet" href="docs.html">Read the docs</a>
+        </div>
+        <ul class="facts">
+          <li>Linux and Windows 7+</li>
+          <li>x86 and x64</li>
+          <li>0.6 MB, no dependencies</li>
+          <li>No credentials on endpoints</li>
+        </ul>
+      </div>
+
+      <figure class="field">
+        <figcaption class="field-head"><span>Wazuh inventory</span><span class="field-count"></span></figcaption>
+        <p class="sr-only">Animation: the Harrier bird sweeps a fleet of agent records row by row, restarting hung agents and removing duplicate and stale records until one record per machine is left.</p>
+        <div class="field-grid" aria-hidden="true"></div>
+        <div class="field-foot">
+          <ol class="field-log" aria-hidden="true"></ol>
+          <button class="field-again" type="button">Patrol again</button>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band" id="install">
+    <div class="wrap">
+      <div class="band-head">
+        <h2>Install with one command</h2>
+        <p>The installer checks Harrier against <code>SHA256SUMS</code>, fetches the official Wazuh agent, enrolls it under its hardware-bound name and starts the <code>harrier</code> service. Run it again to upgrade; when nothing is new, nothing changes.</p>
+      </div>
+      <div class="tabs">
+        <div role="tablist" aria-label="Where to install">
+          <button role="tab" type="button" id="tab-linux" aria-controls="panel-linux" aria-selected="true">Linux</button>
+          <button role="tab" type="button" id="tab-windows" aria-controls="panel-windows" aria-selected="false" tabindex="-1">Windows</button>
+          <button role="tab" type="button" id="tab-server" aria-controls="panel-server" aria-selected="false" tabindex="-1">Wazuh manager</button>
+        </div>
+        <div role="tabpanel" id="panel-linux" aria-labelledby="tab-linux">
+<pre><code>curl -fsSL https://github.com/omidiyanto/harrier/releases/latest/download/install.sh \
+  | sudo sh -s -- --manager 10.0.0.5 --group linux --wazuh-version 4.14.9</code></pre>
+          <p>x86_64 or i686, as root. The Wazuh agent version must be 4.x up to 4.14 and not newer than your manager.</p>
+        </div>
+        <div role="tabpanel" id="panel-windows" aria-labelledby="tab-windows" hidden>
+<pre><code>[Net.ServicePointManager]::SecurityProtocol = 3072; &amp; ([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://github.com/omidiyanto/harrier/releases/latest/download/install.ps1'))) -Manager 10.0.0.5 -Group windows -WazuhVersion 4.14.9</code></pre>
+          <p>x64 or x86, in an elevated PowerShell 3.0 or later. Windows 7 and Server 2008 R2 need WMF 5.1.</p>
+        </div>
+        <div role="tabpanel" id="panel-server" aria-labelledby="tab-server" hidden>
+<pre><code>sudo HARRIER_API_PASSWORD='...' ./harrier-linux-x86_64 setup-server \
+  --api-url https://127.0.0.1:55000 --api-user harrier</code></pre>
+          <p>On the manager, with a <a href="docs.html#server-setup">least-privilege API user</a>. The first run only shows what would change; after that, <code>harrier-reconcile</code> cleans the inventory every hour.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="patrol">
+    <div class="wrap">
+      <div class="band-head">
+        <h2>What the patrol handles</h2>
+        <p>Every five minutes the endpoint service walks this playbook. The letter is what you will find in the logs.</p>
+      </div>
+      <ol class="playbook">
+        <li><span class="code">A</span><strong>Healthy</strong><span>Nothing to do.</span></li>
+        <li><span class="code">B</span><strong>Manager unreachable</strong><span>Stands by. Keys are never touched and the agent buffers events.</span></li>
+        <li><span class="code">C</span><strong>Agent deleted on the server</strong><span>The agent re-enrolls; if it is still refused after an hour, Harrier re-enrolls it.</span></li>
+        <li><span class="code">D</span><strong>Disk cloned to other hardware</strong><span>New name for the new machine. The original agent is never touched.</span></li>
+        <li><span class="code">E</span><strong>Hostname changed</strong><span>Re-enrolls under the new name; the old record goes only after the new one is active.</span></li>
+        <li><span class="code">F</span><strong>Config tampered</strong><span>Repairs the name and label in <code>ossec.conf</code> and restarts the agent.</span></li>
+        <li><span class="code">G</span><strong>Agent stopped or hung</strong><span>Restarts it after 10 minutes, with a 30-minute backoff.</span></li>
+        <li><span class="code">H</span><strong>Group drift</strong><span>Groups move to the surviving record before an old one is deleted.</span></li>
+        <li><span class="code">I</span><strong>Every network card replaced</strong><span>The firmware id ties the new record to the old one, which is then removed.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="band" id="identity">
+    <div class="wrap">
+      <div class="band-head">
+        <h2>A name the hardware can prove</h2>
+        <p>Each agent is named after the machine itself, so two laptops with the same hostname never collide and a cloned disk never takes over the original's record.</p>
+      </div>
+      <div class="anatomy">
+        <div><span class="part">FINANCE-07</span><span class="what"><b>Hostname</b>Readable at a glance in the dashboard.</span></div>
+        <div class="hw"><span class="part">-3fa94c1d02be</span><span class="what"><b>Hardware id</b>SMBIOS UUID, BIOS serial and burned-in MAC addresses.</span></div>
+        <div class="fw"><span class="part">-77a1c0de9f31</span><span class="what"><b>Firmware id</b>UUID and serial only, so it survives new network cards.</span></div>
+      </div>
+      <div class="split">
+        <p>Only the burned-in MACs of physical cards count. Wi-Fi randomization, USB docks, VPN adapters and VirtualBox, Hyper-V or Docker interfaces never change the name, and placeholder firmware values are ignored.</p>
+        <p>The full hardware id travels with every alert as the agent label <code>harrier_hwid</code>. A VM cloned without a new BIOS UUID is reported, never deleted.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="how">
+    <div class="wrap">
+      <div class="band-head">
+        <h2>How it fits next to Wazuh</h2>
+        <p>Endpoints hold no Wazuh credentials and open no ports. Only the reconciler on the manager talks to the Wazuh API, as a least-privilege user over a pinned certificate.</p>
+      </div>
+      <div class="arch">
+        <div class="zone">
+          <h3>Endpoint, Linux or Windows 7+</h3>
+          <div class="node ours">harrier service<small>binds the name, heals, restarts</small></div>
+          <div class="node">Wazuh agent<small>unchanged, from packages.wazuh.com</small></div>
+        </div>
+        <div class="wires">
+          <div class="wire"><b>1514/tcp</b>events, keepalive, upgrades</div>
+          <div class="wire"><b>1515/tcp</b>enrollment</div>
+        </div>
+        <div class="zone">
+          <h3>Wazuh manager</h3>
+          <div class="node">remoted<small>1514/tcp</small></div>
+          <div class="node">authd<small>1515/tcp</small></div>
+          <div class="node">Wazuh API<small>55000/tcp</small></div>
+          <div class="node ours">harrier-reconcile<small>hourly cleanup over HTTPS, pinned certificate</small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="footprint">
+    <div class="wrap">
+      <div class="band-head">
+        <h2>Light enough to forget</h2>
+        <p>Measured on Linux with a healthy agent.</p>
+      </div>
+      <dl class="specs">
+        <div><dt>CPU</dt><dd>About 2 ms per pass, under 1 s per day.</dd></div>
+        <div><dt>Memory</dt><dd>About 2.5 MB, one thread.</dd></div>
+        <div><dt>Network</dt><dd>None while the agent is healthy.</dd></div>
+        <div><dt>Disk</dt><dd>A 0.6 MB binary and a 150-byte state file.</dd></div>
+      </dl>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <span class="footer-perch" data-bird="3" data-idle data-talk></span>
+    <nav aria-label="Footer">
+      <a href="docs.html">Documentation</a>
+      <a href="https://github.com/omidiyanto/harrier">Source code</a>
+      <a href="https://github.com/omidiyanto/harrier/releases">Releases</a>
+    </nav>
+    <p>Harrier is an independent project, not affiliated with or endorsed by Wazuh Inc. Wazuh is a trademark of Wazuh Inc.</p>
+  </div>
+</footer>
+</body>
+</html>

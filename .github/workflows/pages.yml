@@ -1,0 +1,53 @@
+name: Pages
+
+# The documentation site (site/) on GitHub Pages: plain HTML, CSS and JS,
+# plus the brand files from assets/.
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", "assets/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: Assemble the site
+        env:
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          mkdir -p _site/brand
+          cp -r site/. _site/
+          cp assets/harrier-icon.svg assets/harrier-social.png \
+             assets/png/harrier-icon-32.png assets/png/harrier-icon-256.png _site/brand/
+          # Link previews need the absolute address of the social image.
+          sed -i "s|%BASE_URL%|$BASE_URL|g" _site/*.html
+          ! grep -rl '%BASE_URL%' _site
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

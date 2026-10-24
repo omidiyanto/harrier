@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harrier documentation</title>
+<meta name="description" content="Install, operate and understand Harrier: hardware-bound Wazuh agent names, the self-healing patrol, inventory cleanup, server setup and reference.">
+<meta name="theme-color" content="#120d0a">
+<link rel="icon" href="brand/harrier-icon.svg" type="image/svg+xml">
+<link rel="icon" href="brand/harrier-icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="brand/harrier-icon-256.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Harrier documentation">
+<meta property="og:description" content="Install, operate and understand Harrier, the fleet guardian for Wazuh.">
+<meta property="og:image" content="%BASE_URL%/brand/harrier-social.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<script>try{var t=localStorage.getItem("harrier-theme"),s=localStorage.getItem("harrier-sidebar")}catch(e){}var r=document.documentElement;r.dataset.theme=t||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");if(s==="hidden")r.dataset.sidebar="hidden";</script>
+<script src="assets/site.js" defer></script>
+<script src="assets/harrier.js" defer></script>
+</head>
+<body class="docs">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <button class="icon-button" type="button" data-sidebar-toggle aria-controls="sidebar" aria-expanded="true" aria-label="Hide navigation">
+      <svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M1 2h14v1H1zM1 13h14v1H1zM1 3h1v10H1zM14 3h1v10h-1zM5 3h1v10H5zM2 5h2v1H2zM2 7h2v1H2zM2 9h2v1H2z"/></svg>
+    </button>
+    <a class="brand" href="./" aria-label="Harrier home"><span data-bird="2"></span><span class="brand-name">Harrier</span></a>
+    <nav class="topnav" aria-label="Main">
+      <a href="docs.html" aria-current="page">Docs</a>
+      <a href="https://github.com/omidiyanto/harrier">GitHub</a>
+    </nav>
+    <button class="icon-button" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to light theme">
+      <svg class="moon" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M6 1h4v1H6zM4 2h2v1H4zM3 3h1v1H3zM2 4h1v2H2zM1 6h1v4H1zM2 10h1v2H2zM3 12h1v1H3zM4 13h2v1H4zM6 14h4v1H6zM10 13h2v1h-2zM12 12h1v1h-1zM13 10h1v2h-1zM9 9h4v1H9zM7 7h2v2H7zM6 3h1v4H6z"/></svg>
+      <svg class="sun" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M7 0h2v2H7zM7 14h2v2H7zM0 7h2v2H0zM14 7h2v2h-2zM2 2h2v2H2zM12 2h2v2h-2zM2 12h2v2H2zM12 12h2v2h-2zM6 4h4v1H6zM5 5h6v6H5zM6 11h4v1H6zM4 6h1v4H4zM11 6h1v4h-1z"/></svg>
+    </button>
+  </div>
+</header>
+<div class="progress" aria-hidden="true"><div class="progress-fill"></div></div>
+
+<div class="docs-layout">
+  <aside class="sidebar" id="sidebar" aria-label="Documentation">
+    <div class="sidebar-inner">
+      <div class="search-box">
+        <label class="sr-only" for="search">Search the documentation</label>
+        <input id="search" type="search" placeholder="Search the docs" autocomplete="off" spellcheck="false">
+        <kbd aria-hidden="true">/</kbd>
+      </div>
+      <p class="search-empty" role="status" hidden></p>
+      <nav aria-label="Sections">
+        <div class="group"><span>Start</span><ul>
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#quick-start">Quick start</a></li>
+          <li><a href="#how-it-works">How it works</a></li>
+        </ul></div>
+        <div class="group"><span>Concepts</span><ul>
+          <li><a href="#patrol">The patrol</a></li>
+          <li><a href="#identity">Hardware-bound identity</a></li>
+          <li><a href="#hygiene">Inventory hygiene</a></li>
+        </ul></div>
+        <div class="group"><span>Operate</span><ul>
+          <li><a href="#server-setup">Server setup</a></li>
+          <li><a href="#deployment">Offline and managed deployment</a></li>
+          <li><a href="#upgrades">Upgrades</a></li>
+        </ul></div>
+        <div class="group"><span>Reference</span><ul>
+          <li><a href="#commands">Commands</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#files">Files and settings</a></li>
+        </ul></div>
+        <div class="group"><span>Project</span><ul>
+          <li><a href="#security">Security model</a></li>
+          <li><a href="#footprint">Footprint</a></li>
+          <li><a href="#building">Building and testing</a></li>
+        </ul></div>
+      </nav>
+    </div>
+  </aside>
+  <div class="drawer-backdrop"></div>
+
+  <main class="doc" id="main">
+    <div class="doc-inner">
+
+      <section id="overview">
+        <h1>Harrier documentation</h1>
+        <p class="intro">A harrier hunts by quartering: low, steady sweeps over the same field until nothing moves that shouldn't. Harrier does that for your Wazuh fleet.</p>
+        <p>Every five minutes it checks each agent, fixes what drifted, revives what hung, and keeps the inventory on your manager clean: one record per machine, no ghosts, no twins.</p>
+        <h3>Why it exists</h3>
+        <p>Wazuh identifies agents by name, and real fleets are messy:</p>
+        <ul>
+          <li>two laptops ship with the <strong>same hostname</strong> and keep replacing each other;</li>
+          <li>a machine is <strong>re-imaged, cloned or renamed</strong> and comes back as a second agent;</li>
+          <li>agents <strong>hang or get stopped</strong> and nobody notices until an incident;</li>
+          <li><strong>ghost records</strong> pile up, inflating vulnerability counts and hiding real coverage gaps.</li>
+        </ul>
+        <p>Harrier fixes these at the root: the agent name is tied to the <strong>hardware</strong>, the endpoint <strong>heals itself</strong>, and the server <strong>reconciles</strong> the inventory. Endpoints never hold a single Wazuh credential.</p>
+      </section>
+
+      <section id="quick-start">
+        <h2>Quick start</h2>
+        <h3>Linux endpoint</h3>
+        <p>x86_64 or i686, as root:</p>
+<pre><code>curl -fsSL https://github.com/omidiyanto/harrier/releases/latest/download/install.sh \
+  | sudo sh -s -- --manager 10.0.0.5 --group linux --wazuh-version 4.14.9</code></pre>
+        <h3>Windows endpoint</h3>
+        <p>x64 or x86, in an elevated PowerShell 3.0 or later (Windows 7 and Server 2008 R2 need WMF 5.1):</p>
+<pre><code>[Net.ServicePointManager]::SecurityProtocol = 3072; &amp; ([scriptblock]::Create((New-Object Net.WebClient).DownloadString('https://github.com/omidiyanto/harrier/releases/latest/download/install.ps1'))) -Manager 10.0.0.5 -Group windows -WazuhVersion 4.14.9</code></pre>
+        <p>That one command downloads Harrier (verified against <code>SHA256SUMS</code>) and the official Wazuh agent from <code>packages.wazuh.com</code>, installs the agent under its hardware-bound name and starts the <code>harrier</code> service. Run it again to upgrade Harrier or the agent; when nothing is new, it changes nothing.</p>
+        <ul>
+          <li><code>--wazuh-version</code>: Wazuh agent <strong>4.x up to 4.14</strong> (5.x is untested and refused), not newer than the manager. Leave it out where the agent is already installed.</li>
+          <li>Enrollment password: <code>sudo WAZUH_REGISTRATION_PASSWORD=... sh -s -- ...</code> on Linux, <code>-RegistrationPassword</code> on Windows.</li>
+          <li><strong>No internet on endpoints?</strong> Put the release files (<code>install.sh</code>, <code>install.ps1</code>, <code>harrier-*</code>, <code>SHA256SUMS</code>) on an internal HTTPS server or share and point the installer at it with <code>HARRIER_BASE_URL=...</code> (Linux) or <code>-BaseUrl ...</code> (Windows, <code>file://</code> works too). Mirror <code>packages.wazuh.com</code> the same way with <code>WAZUH_PACKAGES_URL</code> or <code>-WazuhPackagesUrl</code>. Never put a GitHub token on endpoints.</li>
+        </ul>
+        <h3>Wazuh manager</h3>
+<pre><code>sudo HARRIER_API_PASSWORD='...' ./harrier-linux-x86_64 setup-server \
+  --api-url https://127.0.0.1:55000 --api-user harrier</code></pre>
+        <p>The first run is a dry-run that shows exactly what would change; from then on the <code>harrier-reconcile</code> service keeps the inventory clean every hour. <a href="#server-setup">Server setup</a> covers the API user and TLS options.</p>
+      </section>
+
+      <section id="how-it-works">
+        <h2>How it works</h2>
+        <p>The endpoint service only talks to the local agent. While the agent is healthy it uses no network at all; it probes 1514/tcp only to tell a dead agent from a manager outage. Only <code>harrier-reconcile</code> talks to the Wazuh API.</p>
+        <div class="arch">
+          <div class="zone">
+            <h3>Endpoint, Linux or Windows 7+</h3>
+            <div class="node ours">harrier service<small>no credentials; binds the name, heals, restarts</small></div>
+            <div class="node">Wazuh agent</div>
+          </div>
+          <div class="wires">
+            <div class="wire"><b>1514/tcp</b>events, keepalive, upgrades</div>
+            <div class="wire"><b>1515/tcp</b>enrollment</div>
+          </div>
+          <div class="zone">
+            <h3>Wazuh manager</h3>
+            <div class="node">remoted <small>1514/tcp</small></div>
+            <div class="node">authd <small>1515/tcp</small></div>
+            <div class="node">Wazuh API <small>55000/tcp</small></div>
+            <div class="node ours">harrier-reconcile<small>least-privilege API user, HTTPS with a pinned certificate</small></div>
+          </div>
+        </div>
+        <div class="table-scroll"><table>
+          <thead><tr><th>Connection</th><th>Port</th><th>Direction</th></tr></thead>
+          <tbody>
+            <tr><td>Agent to manager: events, keepalive, WPK upgrades</td><td>1514/tcp</td><td>endpoint to manager</td></tr>
+            <tr><td>Agent enrollment</td><td>1515/tcp</td><td>endpoint to manager</td></tr>
+            <tr><td><code>harrier-reconcile</code> to the Wazuh API</td><td>55000/tcp</td><td>localhost on the manager</td></tr>
+            <tr><td>Anything into endpoints</td><td>none</td><td>Harrier opens no ports</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section id="patrol">
+        <h2>The patrol</h2>
+        <p>Every pass, the endpoint service walks this playbook. The letter shows up in the logs.</p>
+        <ol class="playbook">
+          <li><span class="code">A</span><strong>Healthy</strong><span>Nothing.</span></li>
+          <li><span class="code">B</span><strong>Manager unreachable</strong><span>Stands by; keys are never touched, the agent buffers events.</span></li>
+          <li><span class="code">C</span><strong>Agent deleted on the server</strong><span>The agent re-enrolls by itself; if a restart has not helped within an hour, Harrier drops the key and re-enrolls.</span></li>
+          <li><span class="code">D</span><strong>Disk cloned or moved to other hardware</strong><span>New hardware name, local identity dropped, re-enroll. The original machine's agent is never touched.</span></li>
+          <li><span class="code">E</span><strong>Hostname changed</strong><span>Re-enrolls under the new name; the server removes the old record only after the new one is active.</span></li>
+          <li><span class="code">F</span><strong><code>ossec.conf</code> name or label tampered, key missing</strong><span>Repairs the config and restarts; a missing key re-enrolls under the same name.</span></li>
+          <li><span class="code">G</span><strong>Agent stopped, disabled or hung</strong><span>Restarts it after 10 minutes, with a 30-minute backoff; on Windows the service manager also restarts a crashed agent.</span></li>
+          <li><span class="code">H</span><strong>Group drift</strong><span>The server is the source of truth: groups move to the surviving record before an old one is deleted.</span></li>
+          <li><span class="code">I</span><strong>Every network card replaced</strong><span>New hardware id, same firmware id: re-enrolls, and the server ties the new record to the old one, carries its groups and removes it.</span></li>
+        </ol>
+        <p>Every re-enrollment backs up <code>ossec.conf</code> and <code>client.keys</code> (<code>*.harrier-bak</code>) and clears the agent's local FIM, SCA and syscollector databases so the new agent id sends a full inventory. Re-enrollment happens at most once an hour, so an identity can never flap. Each action is written to the journal (Linux) or the Application event log (Windows), which the Wazuh agent already ships to your SIEM.</p>
+      </section>
+
+      <section id="identity">
+        <h2>Hardware-bound identity</h2>
+        <p>The agent name is <code>&lt;HOSTNAME&gt;-&lt;hwid&gt;-&lt;fwid&gt;</code>, with 12 hex digits (SHA-256) each:</p>
+        <div class="anatomy">
+          <div><span class="part">FINANCE-07</span><span class="what"><b>Hostname</b>Readable at a glance.</span></div>
+          <div class="hw"><span class="part">-3fa94c1d02be</span><span class="what"><b>hwid</b>The identity.</span></div>
+          <div class="fw"><span class="part">-77a1c0de9f31</span><span class="what"><b>fwid</b>The tag that ties records.</span></div>
+        </div>
+        <div class="table-scroll"><table>
+          <thead><tr><th></th><th>Hashed from</th><th>Changes when</th></tr></thead>
+          <tbody>
+            <tr><td><code>hwid</code></td><td>SMBIOS system UUID, BIOS serial and the burned-in MACs of physical NICs</td><td>the disk lands on other hardware, or every NIC is replaced</td></tr>
+            <tr><td><code>fwid</code></td><td>SMBIOS system UUID and BIOS serial</td><td>the disk lands on other hardware</td></tr>
+          </tbody>
+        </table></div>
+        <p>The <code>hwid</code> is the identity; the <code>fwid</code> stays with the machine when all its network cards change, so the server can tie the old record to the new one. The full <code>hwid</code> is also added as the agent label <code>harrier_hwid</code>, so it travels with every alert.</p>
+        <p>It is built to stay stable on real hardware:</p>
+        <ul>
+          <li>only <strong>burned-in</strong> MACs count, so Wi-Fi MAC randomization and spoofing never change the identity;</li>
+          <li>USB adapters and docks, virtual (VirtualBox, Hyper-V, Docker), VPN/TAP, Bluetooth and locally administered interfaces are ignored; VM guest NICs are kept;</li>
+          <li>placeholder firmware values (<code>To be filled by O.E.M.</code>, all-zero UUIDs) are ignored;</li>
+          <li>a NIC that disappears (adapter disabled, driver still loading) keeps the identity as long as UUID and serial match and one MAC is still shared. A cloned disk on different hardware does not.</li>
+        </ul>
+        <p>Without a usable UUID <em>and</em> serial, the <code>fwid</code> is the <code>hwid</code> itself; the OS machine id is used only when the firmware exposes nothing at all. A VM cloned without a new BIOS UUID shares its <code>fwid</code> with the original: both stay untouched and the server logs a warning.</p>
+      </section>
+
+      <section id="hygiene">
+        <h2>Inventory hygiene</h2>
+        <p><code>harrier-reconcile</code> runs next to the manager and is the only component that talks to the Wazuh API. Each hour it plans, then applies:</p>
+        <ul>
+          <li><strong>Twins</strong>: records with the same <code>fwid</code> (rename, re-image, lost key, new NICs). The best one stays (active first, then most recent keepalive, then newest id); the inactive rest go.</li>
+          <li><strong>Legacy names</strong>: an inactive plain-hostname record whose machine is now active under its hardware-bound name.</li>
+          <li><strong>Stale agents</strong>: disconnected for 30 days or never connected for 7 days (both configurable, <code>0</code> turns them off).</li>
+        </ul>
+        <div class="note"><p><strong>Safety rails.</strong> An active agent is never deleted. Two active agents with the same <code>fwid</code> only raise a warning. Groups are carried over before anything is removed. A run that would delete more than <code>max_delete</code> agents (default 50) is refused as a whole, and <code>protect_groups</code> shields agents from stale cleanup.</p></div>
+        <p><code>harrier reconcile</code> without <code>--apply</code> prints the plan and changes nothing:</p>
+<pre><code><span class="prompt">$ </span>sudo harrier reconcile
+harrier reconcile: 412 agents, 3 actions
+  REGROUP    518 WEB-02-3fa94c1d02be-77a1c0de9f31: groups dmz (carried over from 412)
+  DELETE     412 WEB-01-3fa94c1d02be-77a1c0de9f31: duplicate of WEB-02-3fa94c1d02be-77a1c0de9f31 (518)
+  DELETE     107 PC-OLD: stale: disconnected, last seen 2026-08-30T09:12:44+00:00
+dry-run: nothing changed; re-run with --apply</code></pre>
+      </section>
+
+      <section id="server-setup">
+        <h2>Server setup</h2>
+        <ol>
+          <li><p>Create a least-privilege API user (dashboard <strong>Security</strong>, or the API) with <code>agent:read</code>, <code>agent:delete</code> and <code>agent:modify_group</code> on <code>agent:id:*</code>, plus <code>group:modify_assignments</code> on <code>group:id:*</code>, for example a user named <code>harrier</code>.</p></li>
+          <li><p>Run <code>setup-server</code> as shown in <a href="#quick-start">Quick start</a>. TLS options, safest first:</p>
+            <ul>
+              <li><strong>default on the manager</strong>: the API certificate key is pinned automatically from <code>/var/ossec/api/configuration/ssl/server.crt</code>;</li>
+              <li><code>--api-cert FILE</code> or <code>--api-pin sha256//...</code>: pin the (self-signed) certificate of a remote API;</li>
+              <li><code>--api-ca-file FILE</code>: regular CA validation;</li>
+              <li><code>--api-insecure</code>: no verification, for labs only. Anyone who can intercept the traffic can steal the API password, so every run logs a warning. Pinning works with self-signed certificates too.</li>
+            </ul></li>
+          <li><p>Recommended on the manager: because Harrier names are unique per machine, a short replacement window is safe and brings a reinstalled machine back in minutes instead of an hour.</p>
+<pre><code>&lt;auth&gt;
+  &lt;force&gt;
+    &lt;enabled&gt;yes&lt;/enabled&gt;
+    &lt;key_mismatch&gt;yes&lt;/key_mismatch&gt;
+    &lt;disconnected_time enabled="yes"&gt;10m&lt;/disconnected_time&gt;
+    &lt;after_registration_time&gt;1h&lt;/after_registration_time&gt;
+  &lt;/force&gt;
+&lt;/auth&gt;</code></pre></li>
+        </ol>
+      </section>
+
+      <section id="deployment">
+        <h2>Offline and managed deployment</h2>
+        <p>For GPO, Intune, SCCM or Ansible, copy the binary and the agent package and run, elevated:</p>
+<pre><code>set WAZUH_REGISTRATION_PASSWORD=&lt;enrollment password, if used&gt;
+harrier-windows-x86_64.exe setup --manager 10.0.0.5 --group windows ^
+  --package \\fileserver\wazuh\wazuh-agent-4.14.9-1.msi</code></pre>
+<pre><code>sudo WAZUH_REGISTRATION_PASSWORD='...' ./harrier-linux-x86_64 setup \
+  --manager 10.0.0.5 --group linux --package ./wazuh-agent_4.14.9-1_amd64.deb</code></pre>
+        <p><code>setup</code> installs Harrier into its fixed location, so it can run from anywhere, and every run converges to the same state:</p>
+        <ul>
+          <li>agent missing: installs it, already under its hardware-bound name;</li>
+          <li>package differs from the last one Harrier installed: upgrades in place, keeping the agent's configuration;</li>
+          <li>same package: nothing to do.</li>
+        </ul>
+        <p>The package is kept with its SHA-256 pinned (<code>--package-sha256</code> checks it up front), so Harrier can reinstall an agent someone removed. Settings are saved only after the installer succeeds, so a failed run is retried by running the same command again. The enrollment password goes to <code>authd.pass</code>, never onto a command line.</p>
+      </section>
+
+      <section id="upgrades">
+        <h2>Upgrades</h2>
+        <p><strong>The Wazuh agent</strong>, either way:</p>
+        <ul>
+          <li>centrally with WPK from the manager (dashboard <em>Agents, Upgrade</em>, or <code>PUT /agents/upgrade</code>), then roll out the matching package with <code>harrier setup --package &lt;new&gt;</code> so self-healing reinstalls use it too;</li>
+          <li>or run the one-command installer (or <code>setup</code>) with the new version: it upgrades the agent in place.</li>
+        </ul>
+        <p>Harrier supports the Wazuh agent <strong>4.x up to 4.14</strong>; 5.x is untested, and the installers and <code>setup --package</code> refuse it. Harrier only edits <code>&lt;agent_name&gt;</code> and the <code>harrier_hwid</code> label in <code>ossec.conf</code>, which the vendor installers preserve. Package managers refuse downgrades.</p>
+        <p><strong>Harrier itself</strong>: run the installer, or the new binary's <code>setup</code>, again. It replaces the binary, keeps the config and restarts the service. There is deliberately no self-update channel: an unsigned auto-update would be an attack path.</p>
+      </section>
+
+      <section id="reference">
+        <h2>Reference</h2>
+        <section id="commands">
+          <h3>Commands</h3>
+          <div class="table-scroll"><table>
+            <thead><tr><th>Command</th><th>Where</th><th>What</th></tr></thead>
+            <tbody>
+              <tr><td><code>setup</code></td><td>endpoint</td><td>install or upgrade Harrier and the agent, bind identity, run the <code>harrier</code> service</td></tr>
+              <tr><td><code>check</code></td><td>endpoint</td><td>one self-healing pass now (the service runs one every 5 minutes)</td></tr>
+              <tr><td><code>status</code></td><td>endpoint</td><td>hardware identity, enrolled name, agent state, manager reachability</td></tr>
+              <tr><td><code>name</code></td><td>endpoint</td><td>print the hardware-bound agent name</td></tr>
+              <tr><td><code>uninstall</code></td><td>both</td><td>remove the Harrier services (the agent stays)</td></tr>
+              <tr><td><code>setup-server</code></td><td>server</td><td>store API settings (mode 600), verify, run the <code>harrier-reconcile</code> service</td></tr>
+              <tr><td><code>reconcile [--apply]</code></td><td>server</td><td>plan, or with <code>--apply</code> execute, the inventory cleanup</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+        <section id="services">
+          <h3>Services</h3>
+          <div class="table-scroll"><table>
+            <thead><tr><th></th><th>Linux</th><th>Windows</th></tr></thead>
+            <tbody>
+              <tr><td>Endpoint</td><td>systemd <code>harrier.service</code>, <code>Restart=always</code></td><td>service <code>harrier</code>, LocalSystem, delayed auto-start, restart on failure</td></tr>
+              <tr><td>Server</td><td>systemd <code>harrier-reconcile.service</code></td><td>service <code>harrier-reconcile</code>, if run on Windows</td></tr>
+              <tr><td>Logs</td><td><code>journalctl -u harrier</code></td><td>Application event log, source <code>harrier</code></td></tr>
+            </tbody>
+          </table></div>
+          <p>Both run <code>harrier daemon check|reconcile</code>: one pass, then sleep for <code>interval_minutes</code> (5 or 60), re-reading the config every pass so edits apply without a restart. A repeated identical error is logged once, not on every pass. Linux hosts without systemd can run <code>/opt/harrier/harrier daemon check</code> under their own init system.</p>
+        </section>
+        <section id="files">
+          <h3>Files and settings</h3>
+          <div class="table-scroll"><table>
+            <thead><tr><th></th><th>Linux</th><th>Windows</th></tr></thead>
+            <tbody>
+              <tr><td>Binary</td><td><code>/opt/harrier/harrier</code></td><td><code>%ProgramFiles%\Harrier\harrier.exe</code></td></tr>
+              <tr><td>Endpoint config</td><td><code>/etc/harrier/harrier.conf</code></td><td><code>%ProgramFiles%\Harrier\harrier.conf</code></td></tr>
+              <tr><td>Server config (mode 600)</td><td><code>/etc/harrier/server.conf</code></td><td><code>%ProgramFiles%\Harrier\server.conf</code></td></tr>
+              <tr><td>State, agent package</td><td><code>/var/lib/harrier/</code></td><td><code>%ProgramFiles%\Harrier\</code></td></tr>
+            </tbody>
+          </table></div>
+          <p>Endpoint keys: <code>manager</code>, <code>group</code>, <code>package</code>, <code>package_sha256</code>, <code>agent_dir</code>, <code>interval_minutes</code> (5), <code>grace_minutes</code> (10), <code>backoff_minutes</code> (30).</p>
+          <p>Server keys: <code>api_url</code>, <code>api_user</code>, <code>api_password</code>, <code>api_ca_file</code>, <code>api_pin</code>, <code>api_insecure</code> (false), <code>interval_minutes</code> (60), <code>disconnected_days</code> (30), <code>never_connected_days</code> (7), <code>max_delete</code> (50), <code>protect_groups</code> (comma separated).</p>
+        </section>
+      </section>
+
+      <section id="security">
+        <h2>Security model</h2>
+        <p>Harrier runs as root or SYSTEM, so everything it reads or executes must be writable by administrators only.</p>
+        <ul>
+          <li><strong>No credentials on endpoints.</strong> Only <code>harrier-reconcile</code> talks to the API, passing password and token to <code>curl</code> on stdin, never on a command line.</li>
+          <li><strong>Trusted locations only.</strong> On Linux the config must be owned by root and not writable by others (<code>server.conf</code> mode 600, foreign symlinks rejected) and <code>/opt/harrier</code> must not be writable by others. On Windows, config, state and binary must live in <code>%ProgramFiles%\Harrier</code>; a <code>--config</code> elsewhere is refused.</li>
+          <li><strong>Secrets are never briefly exposed</strong>: files are created with their final permissions in a temp file, then renamed into place.</li>
+          <li><strong>No shell, fixed tool paths.</strong> Linux tools resolve through <code>/usr/sbin:/usr/bin:/sbin:/bin</code>; Windows tools run from System32 by full path. <code>--config</code> paths are limited to plain characters because they end up in service command lines.</li>
+          <li><strong>No DLL planting.</strong> On Windows, imports load from System32 only (Windows 10 1607 and later) and <code>iphlpapi.dll</code> is loaded by absolute path, which covers Windows 7 as well. On Windows 7 and 8, still run <code>setup</code> from a location users cannot write to (such as the deployment share), not from Downloads.</li>
+          <li><strong>Pinned packages.</strong> The Wazuh agent package is pinned by SHA-256 and re-verified before every install, upgrade or self-healing reinstall.</li>
+          <li><strong>Validated writes.</strong> Values written into <code>ossec.conf</code> are validated, so there is no XML injection.</li>
+        </ul>
+        <p>Manage two things on the Wazuh side:</p>
+        <ul>
+          <li>Agent names are not secret: anyone who can enroll can claim another machine's name, just as with Wazuh's own force-replacement. <strong>Require an enrollment password or agent certificates</strong> on the manager.</li>
+          <li>Release binaries are not code-signed. Verify <code>SHA256SUMS</code> or the build attestation (<code>gh attestation verify harrier-&lt;asset&gt; --repo omidiyanto/harrier</code>), and sign them with your organization's certificate if SmartScreen or AppLocker requires it.</li>
+        </ul>
+      </section>
+
+      <section id="footprint">
+        <h2>Footprint</h2>
+        <p>Measured on Linux with a healthy agent:</p>
+        <dl class="specs">
+          <div><dt>CPU</dt><dd>About 2 ms per pass, under 1 s per day.</dd></div>
+          <div><dt>Memory</dt><dd>About 2.5 MB, one thread.</dd></div>
+          <div><dt>Network</dt><dd>None while the agent is healthy.</dd></div>
+          <div><dt>Disk</dt><dd>0.6 MB binary, a 150-byte state file, plus the pinned agent package.</dd></div>
+        </dl>
+      </section>
+
+      <section id="building">
+        <h2>Building and testing</h2>
+<pre><code>cargo test &amp;&amp; cargo clippy --all-targets -- -D warnings
+cargo build --release --target x86_64-unknown-linux-musl
+<span class="dim"># Windows 7 and later (tier-3 target, nightly toolchain):</span>
+cargo +nightly build --release -Z build-std=std,panic_abort --target x86_64-win7-windows-msvc</code></pre>
+        <p>Windows builds embed <code>assets/harrier.ico</code> as the executable icon (see <code>build.rs</code>). CI lints and tests on Linux and Windows, builds all four binaries, runs an end-to-end install with a real Wazuh agent on both platforms, and on a <code>vX.Y.Z</code> tag publishes a release with <code>SHA256SUMS</code> and build provenance.</p>
+        <p>A separate integration workflow, on every push and nightly, runs Harrier against a real Wazuh single-node stack from the official docker compose: enrollment, the identity label in indexed alerts, the least-privilege API user, certificate pinning, the <code>max_delete</code> guard, twin, network-card and legacy cleanup on real records, and cases C, E and F.</p>
+        <p class="pager"><span data-bird="3" data-idle data-talk></span>Harrier is an independent project, not affiliated with or endorsed by Wazuh Inc. Wazuh is a trademark of Wazuh Inc.</p>
+      </section>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>
