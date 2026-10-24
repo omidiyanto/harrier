@@ -87,6 +87,7 @@ role=$(id_of "$(api POST /security/roles -d '{"name":"harrier"}')")
 [[ "$user $p1 $p2 $role" =~ ^[0-9]+\ [0-9]+\ [0-9]+\ [0-9]+$ ]]
 api POST "/security/roles/$role/policies?policy_ids=$p1,$p2" >/dev/null
 api POST "/security/users/$user/roles?role_ids=$role" >/dev/null
+sleep 2
 
 server() { sudo HARRIER_API_PASSWORD="$API_PASSWORD" "$bin" setup-server --api-url "$API" --api-user harrier "$@"; }
 step "setup-server refuses a certificate that does not match the pin"

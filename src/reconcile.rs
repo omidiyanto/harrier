@@ -319,6 +319,7 @@ impl Api {
     pub fn call(&mut self, method: &str, path: &str) -> Result<Json, String> {
         let mut r = self.curl(method, path, false)?;
         if r.0 == 401 {
+            std::thread::sleep(std::time::Duration::from_millis(1100));
             self.login()?;
             r = self.curl(method, path, false)?;
         }
