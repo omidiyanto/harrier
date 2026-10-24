@@ -106,8 +106,10 @@ step "Inventory hygiene: twins, new network cards, legacy names"
 host=${name%-*-*} fw=${name##*-} rest=${name%-*}
 hw=${rest##*-}
 twin=old-$host-$hw-$fw nic=$host-0a1b2c3d4e5f-$fw other=other-0a1b2c3d4e5f-0a1b2c3d4e5f
-api PUT "/agents/$(add_agent "$twin")/group/finance?force_single_group=true" >/dev/null
-for n in "$nic" "$host" "$other"; do add_agent "$n" >/dev/null; done
+listed() { [ -n "$(agent "$1")" ]; }
+for n in "$twin" "$nic" "$host" "$other"; do add_agent "$n" >/dev/null; done
+for n in "$twin" "$nic" "$host" "$other"; do wait_for 60 listed "$n"; done
+api PUT "/agents/$(agent "$twin" | jq -r .id)/group/finance?force_single_group=true" >/dev/null
 
 plan=$(sudo "$harrier" reconcile)
 echo "$plan"
@@ -126,7 +128,7 @@ sudo rm /etc/harrier/strict.conf
 [ -n "$(agent "$twin")" ] || fail "max_delete guard deleted agents"
 
 sudo "$harrier" reconcile --apply
-for n in "$twin" "$nic" "$host"; do gone "$n" || fail "$n was not deleted"; done
+for n in "$twin" "$nic" "$host"; do wait_for 60 gone "$n"; done
 [ -n "$(agent "$other")" ] || fail "unrelated agent deleted"
 agent "$name" | jq -e '.status == "active" and .group == ["finance"]'
 
@@ -146,7 +148,7 @@ wait_for 300 is_status "$name" disconnected
 plan=$(sudo "$harrier" reconcile --apply)
 echo "$plan"
 grep -qE "DELETE +[0-9]+ $name: duplicate of $new " <<<"$plan"
-gone "$name" || fail "old record kept"
+wait_for 60 gone "$name"
 agent "$new" | jq -e '.status == "active" and .group == ["finance"]'
 
 step "Case C: an agent deleted on the server comes back under its name"
