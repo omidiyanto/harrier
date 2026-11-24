@@ -2,7 +2,7 @@
   <img src="assets/harrier-logo.svg" alt="Harrier" width="560">
 </p>
 
-<h3 align="center">The fleet guardian for Wazuh</h3>
+<h3 align="center">The anti-tamper for Wazuh</h3>
 
 <p align="center">
   Hardware-bound agent identity · self-healing agents · an inventory you can trust<br>
